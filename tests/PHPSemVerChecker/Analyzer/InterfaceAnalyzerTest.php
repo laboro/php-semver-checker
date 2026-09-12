@@ -3,6 +3,7 @@
 namespace PHPSemVerChecker\Test\Analyzer;
 
 use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Interface_;
 use PHPSemVerChecker\Analyzer\InterfaceAnalyzer;
 use PHPSemVerChecker\Registry\Registry;
@@ -102,4 +103,23 @@ class InterfaceAnalyzerTest extends TestCase {
 		$expectedLevel = Level::MAJOR;
 		$this->assertCount(2, $report[$context][$expectedLevel], 'Interfaces with similar names but different namespace are possibly considered the same in the analyzer logic');
 	}
+
+	public function testInterfaceNameCaseUnchangedWhenInterfaceBodyChanges()
+	{
+		$before = new Registry();
+		$after = new Registry();
+
+		$before->addInterface(new Interface_('TestInterface'));
+		$after->addInterface(new Interface_('TestInterface', [
+			'stmts' => [
+				new ClassMethod('addedMethod'),
+			],
+		]));
+
+		$analyzer = new InterfaceAnalyzer();
+		$report = $analyzer->analyze($before, $after);
+
+		$this->assertNoOperationWithCode($report, 'V153');
+	}
+
 }
