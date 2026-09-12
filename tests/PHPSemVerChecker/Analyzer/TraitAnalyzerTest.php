@@ -3,6 +3,7 @@
 namespace PHPSemVerChecker\Test\Analyzer;
 
 use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Trait_;
 use PHPSemVerChecker\Analyzer\TraitAnalyzer;
 use PHPSemVerChecker\Registry\Registry;
@@ -100,4 +101,23 @@ class TraitAnalyzerTest extends TestCase {
 		$expectedLevel = Level::MAJOR;
 		$this->assertCount(2, $report[$context][$expectedLevel], 'Traits with similar names but different namespace are possibly considered the same in the analyzer logic');
 	}
+
+	public function testTraitNameCaseUnchangedWhenTraitBodyChanges()
+	{
+		$before = new Registry();
+		$after = new Registry();
+
+		$before->addTrait(new Trait_('TestTrait'));
+		$after->addTrait(new Trait_('TestTrait', [
+			'stmts' => [
+				new ClassMethod('addedMethod'),
+			],
+		]));
+
+		$analyzer = new TraitAnalyzer();
+		$report = $analyzer->analyze($before, $after);
+
+		$this->assertNoOperationWithCode($report, 'V155');
+	}
+
 }
