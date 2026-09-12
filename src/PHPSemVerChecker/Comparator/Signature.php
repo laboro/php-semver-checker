@@ -40,7 +40,7 @@ class Signature
 			}
 
 			// Type checking
-			if (Type::get($parametersA[$i]->type) !== Type::get($parametersB[$i]->type)) {
+			if (Type::getForParameter($parametersA[$i]) !== Type::getForParameter($parametersB[$i])) {
 				//if ($paramsA[$i]->default !== null && $paramsB[$i]->default !== null) {
 				//	$changes['parameter_default_value_changed'] = true;
 				if ($parametersA[$i]->type !== null) {
